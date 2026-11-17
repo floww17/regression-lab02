@@ -125,4 +125,29 @@ EXPERIMENTS = {
         ),
         param_grid=FOREST_GRID_LOG,
     ),
+    # ---- E4: влияет ли признак объёма V = Length3 * Height * Width ----
+    # Одна и та же модель (Ridge, alpha по кросс-валидации), те же данные и разбиение;
+    # отличается только наличие V_proxy.
+    "E4a-ridge-raw-without-V": dict(
+        description="Ridge без логарифмов, без V_proxy (Length3, Height, Width)",
+        numeric=AUTHOR_NUMERIC,
+        build=lambda: make_model(Ridge(), AUTHOR_NUMERIC, CATEGORICAL),
+        param_grid={"regressor__alpha": ALPHAS},
+    ),
+    "E4b-ridge-raw-with-V": dict(
+        description="Ridge без логарифмов, с V_proxy",
+        numeric=AUTHOR_NUMERIC + ["V_proxy"],
+        build=lambda: make_model(Ridge(), AUTHOR_NUMERIC + ["V_proxy"], CATEGORICAL),
+        param_grid={"regressor__alpha": ALPHAS},
+    ),
+    # Сравнивать с E2a: та же модель в логарифмах, но с V_proxy
+    "E4c-ridge-log-with-V": dict(
+        description="Ridge в логарифмах (признаки и цель) с V_proxy; сравнить с E2a",
+        numeric=AUTHOR_NUMERIC + ["V_proxy"],
+        build=lambda: make_model(
+            Ridge(), AUTHOR_NUMERIC + ["V_proxy"], CATEGORICAL,
+            log_features=True, target="log",
+        ),
+        param_grid={"regressor__regressor__alpha": ALPHAS},
+    ),
 }

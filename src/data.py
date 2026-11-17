@@ -23,5 +23,10 @@ def load_train_test():
     df = pd.read_csv(cfg["data_path"])
     train = df.iloc[saved["train_idx"]]
     test = df.iloc[saved["test_idx"]]
-    feats = NUMERIC_ALL + CATEGORICAL
+    # Производный признак: приближённый объём. Считается только из входных
+    # измерений строки, масса (цель) в нём не используется.
+    df = df.assign(V_proxy=df["Length3"] * df["Height"] * df["Width"])
+    train = df.iloc[saved["train_idx"]]
+    test = df.iloc[saved["test_idx"]]
+    feats = NUMERIC_ALL + ["V_proxy"] + CATEGORICAL
     return train[feats], train[TARGET], test[feats], test[TARGET]
