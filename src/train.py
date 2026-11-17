@@ -131,7 +131,15 @@ def main():
 
     table = pd.DataFrame(rows).set_index("experiment")
     Path("runs").mkdir(exist_ok=True)
-    table.to_csv("runs/cv_results.csv")
+    # Накопительная таблица: запуск части экспериментов не стирает результаты остальных
+    results_path = Path("runs/cv_results.csv")
+    if results_path.exists():
+        old = pd.read_csv(results_path, index_col="experiment")
+        merged = pd.concat([old.drop(index=table.index, errors="ignore"), table])
+        merged = merged.reindex([n for n in EXPERIMENTS if n in merged.index])
+    else:
+        merged = table
+    merged.to_csv(results_path)
     pd.set_option("display.width", 200)
     print(table.round(3).to_string())
 
