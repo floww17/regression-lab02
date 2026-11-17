@@ -4,11 +4,15 @@ import numpy as np
 from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.dummy import DummyRegressor
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 
 from src.data import CATEGORICAL, NUMERIC_ALL
+from src.split import load_config
+
+SEED = load_config()["seed"]
 
 
 def make_preprocessor(numeric, categorical, log_features=False):
@@ -49,6 +53,12 @@ def make_model(regressor, numeric, categorical, log_features=False, target="raw"
 
 AUTHOR_NUMERIC = ["Length3", "Height", "Width"]  # так делал автор проекта
 
+# Сетки гиперпараметров (заданы заранее, чтобы не подгонять под результат)
+ALPHAS = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
+_FOREST = {"max_depth": [4, 8, None], "min_samples_leaf": [1, 2, 4]}
+FOREST_GRID_RAW = {f"regressor__{k}": v for k, v in _FOREST.items()}
+FOREST_GRID_LOG = {f"regressor__regressor__{k}": v for k, v in _FOREST.items()}
+
 EXPERIMENTS = {
     "E0-mean": dict(
         description="Наивный прогноз: среднее обучающей выборки",
@@ -78,5 +88,41 @@ EXPERIMENTS = {
         build=lambda: make_model(
             LinearRegression(), AUTHOR_NUMERIC, CATEGORICAL, log_features=True, target="log"
         ),
+    ),
+    # ---- E2: гребневая регрессия, alpha выбирается кросс-валидацией ----
+    "E2a-ridge-author-features": dict(
+        description="Ridge, признаки автора (Length3, Height, Width), лог признаков и цели",
+        numeric=AUTHOR_NUMERIC,
+        build=lambda: make_model(
+            Ridge(), AUTHOR_NUMERIC, CATEGORICAL, log_features=True, target="log"
+        ),
+        param_grid={"regressor__regressor__alpha": ALPHAS},
+    ),
+    "E2b-ridge-all-lengths": dict(
+        description="Ridge, все три длины (сильно коррелируют), лог признаков и цели",
+        numeric=NUMERIC_ALL,
+        build=lambda: make_model(
+            Ridge(), NUMERIC_ALL, CATEGORICAL, log_features=True, target="log"
+        ),
+        param_grid={"regressor__regressor__alpha": ALPHAS},
+    ),
+    # ---- E3: случайный лес, небольшая заранее заданная сетка ----
+    "E3a-forest-raw-target": dict(
+        description="Случайный лес, масса без преобразования",
+        numeric=NUMERIC_ALL,
+        build=lambda: make_model(
+            RandomForestRegressor(n_estimators=100, random_state=SEED),
+            NUMERIC_ALL, CATEGORICAL,
+        ),
+        param_grid=FOREST_GRID_RAW,
+    ),
+    "E3b-forest-log-target": dict(
+        description="Случайный лес, цель log(y)",
+        numeric=NUMERIC_ALL,
+        build=lambda: make_model(
+            RandomForestRegressor(n_estimators=100, random_state=SEED),
+            NUMERIC_ALL, CATEGORICAL, target="log",
+        ),
+        param_grid=FOREST_GRID_LOG,
     ),
 }

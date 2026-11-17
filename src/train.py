@@ -15,6 +15,7 @@ from pathlib import Path
 
 import pandas as pd
 import sklearn
+from sklearn.model_selection import GridSearchCV, KFold
 
 from src.data import load_train_test
 from src.evaluate import cv_metrics, oof_predictions
@@ -39,11 +40,34 @@ def git_info():
 
 
 def run_one(name, spec, X, y, seed, use_mlflow):
-    model = spec["build"]()
+    base = spec["build"]()
     X_sel = X[spec["numeric"] + ["Species"]]
+    grid = spec.get("param_grid")
+
+    t0 = time.time()
+    if grid:
+        # Вложенная проверка: внутри каждого внешнего фолда параметры подбираются
+        # только по его обучающей части, поэтому оценка честная.
+        inner_cv = KFold(n_splits=5, shuffle=True, random_state=seed)
+        model = GridSearchCV(base, grid, cv=inner_cv, scoring="neg_mean_squared_error", n_jobs=-1
+        )
+    else:
+        model = base
 
     metrics = cv_metrics(model, X_sel, y, seed)
     oof = oof_predictions(model, X_sel, y, seed)
+    extra_params = {}
+    if grid:
+        # Какие параметры выбрались на всей обучающей части (для отчёта и сохранения модели)
+        model.fit(X_sel, y)
+        extra_params = {
+            "param_grid": str(grid),
+            "best_params": str(model.best_params_),
+            "inner_cv": "KFold(5, shuffle)",
+        }
+        print(f"   лучшие параметры: {model.best_params_}")
+    metrics["duration_sec"] = round(time.time() - t0, 1)
+
     oof_path = Path("runs") / f"oof_{name}.csv"
     oof_path.parent.mkdir(exist_ok=True)
     oof.to_csv(oof_path)
@@ -55,12 +79,13 @@ def run_one(name, spec, X, y, seed, use_mlflow):
         params = {
             "experiment": name,
             "description": spec["description"],
-            "model": type(model).__name__,
+            "model": type(base).__name__,
             "features": ",".join(X_sel.columns),
             "seed": seed,
             "cv": "RepeatedKFold(5 folds x 3 repeats)",
             "n_train": len(y),
             "data_sha256": saved["data_sha256"],
+            **extra_params,
         }
         tags = {
             **git_info(),
