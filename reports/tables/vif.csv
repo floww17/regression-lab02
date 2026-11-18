@@ -1,0 +1,25 @@
+набор,шкала,признак,VIF
+"L3, H, W",исходная,Length3,4.0
+"L3, H, W",исходная,Height,2.6
+"L3, H, W",исходная,Width,5.2
+"L3, H, W",логарифм,Length3,6.9
+"L3, H, W",логарифм,Height,5.2
+"L3, H, W",логарифм,Width,10.3
+"L3, H, W, V",исходная,Length3,4.2
+"L3, H, W, V",исходная,Height,4.9
+"L3, H, W, V",исходная,Width,6.2
+"L3, H, W, V",исходная,V_proxy,9.0
+"L3, H, W, V",логарифм,Length3,inf
+"L3, H, W, V",логарифм,Height,inf
+"L3, H, W, V",логарифм,Width,inf
+"L3, H, W, V",логарифм,V_proxy,inf
+"L1, L2, L3, H, W",исходная,Length1,1557.3
+"L1, L2, L3, H, W",исходная,Length2,2091.7
+"L1, L2, L3, H, W",исходная,Length3,417.6
+"L1, L2, L3, H, W",исходная,Height,14.4
+"L1, L2, L3, H, W",исходная,Width,12.0
+"L1, L2, L3, H, W",логарифм,Length1,1229.1
+"L1, L2, L3, H, W",логарифм,Length2,1755.8
+"L1, L2, L3, H, W",логарифм,Length3,424.7
+"L1, L2, L3, H, W",логарифм,Height,18.5
+"L1, L2, L3, H, W",логарифм,Width,24.3

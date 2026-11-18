@@ -51,6 +51,18 @@ def make_model(regressor, numeric, categorical, log_features=False, target="raw"
     return pipe
 
 
+def describe_model(model):
+    """Класс итогового регрессора и преобразование цели (для журнала MLflow)."""
+    target = "none"
+    m = model
+    if isinstance(m, TransformedTargetRegressor):
+        target = getattr(m.func, "__name__", "custom")
+        m = m.regressor
+    if isinstance(m, Pipeline):
+        m = m.steps[-1][1]
+    return type(m).__name__, target
+
+
 AUTHOR_NUMERIC = ["Length3", "Height", "Width"]  # так делал автор проекта
 
 # Сетки гиперпараметров (заданы заранее, чтобы не подгонять под результат)

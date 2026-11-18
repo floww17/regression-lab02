@@ -15,13 +15,17 @@ import time
 from pathlib import Path
 
 import joblib
-import pandas as pd
-import sklearn
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+import pandas as pd  # noqa: E402
+import sklearn  # noqa: E402
 from sklearn.model_selection import GridSearchCV, KFold
 
 from src.data import load_train_test
 from src.evaluate import regression_metrics
-from src.experiments import EXPERIMENTS
+from src.experiments import EXPERIMENTS, describe_model
 from src.split import load_config, load_split
 from src.train import MLFLOW_EXPERIMENT, TRACKING_URI, git_info
 
@@ -40,6 +44,23 @@ def fit_final(spec, X, y, seed):
         base, grid, cv=cv, scoring="neg_mean_squared_error", n_jobs=-1
     ).fit(X, y)
     return search.best_estimator_, str(search.best_params_)
+
+
+def save_test_figure(name, y_true, pred, path):
+    """Остатки против прогноза и прогноз против истины на тестовой выборке."""
+    fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+    ax[0].scatter(pred, y_true - pred, s=24)
+    ax[0].axhline(0, color="k", lw=1)
+    ax[0].set(title=f"{name}: остатки (тест)", xlabel="Прогноз массы, г",
+              ylabel="Остаток (факт − прогноз), г")
+    top = max(y_true.max(), pred.max())
+    ax[1].scatter(y_true, pred, s=24)
+    ax[1].plot([0, top], [0, top], "k--", lw=1)
+    ax[1].set(title=f"{name}: прогноз и истина (тест)", xlabel="Истинная масса, г",
+              ylabel="Прогноз массы, г")
+    fig.tight_layout()
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
 
 
 def main():
@@ -87,6 +108,16 @@ def main():
         print(f"{name}: test MSE={m['mse']:.1f} MAE={m['mae']:.1f} R2={m['r2']:.3f}")
 
         is_chosen = name == CHOSEN
+        preds_df = pd.DataFrame({"y_true": y_test, "y_pred": pred}, index=y_test.index)
+        preds_df["residual"] = preds_df["y_true"] - preds_df["y_pred"]
+        preds_df["abs_error"] = preds_df["residual"].abs()
+        preds_df["Species"] = X_test["Species"].values
+        preds_path = Path("runs") / f"test_predictions_{name}.csv"
+        preds_df.to_csv(preds_path)
+        Path("runs/figures").mkdir(parents=True, exist_ok=True)
+        fig_path = Path("runs/figures") / f"{name}_test.png"
+        save_test_figure(name, y_test, pd.Series(pred, index=y_test.index), fig_path)
+
         if is_chosen:
             joblib.dump(model, MODEL_PATH)
             details = X_test[cols].copy()
@@ -113,12 +144,19 @@ def main():
             )
 
         if use_mlflow:
+            regressor_name, target_transform = describe_model(model)
             with mlflow.start_run(run_name=f"{name}-TEST-{stamp}") as run:
                 mlflow.log_params({
                     "experiment": name,
+                    "description": spec["description"],
                     "stage": "final test evaluation",
-                    "best_params": best_params,
+                    "model": regressor_name,
+                    "target_transform": target_transform,
+                    "features": ",".join(cols),
+                    "best_params": best_params or "none",
                     "seed": seed,
+                    "split": f"stratified by {saved['stratify_by']}, test_size={saved['test_size']}",
+                    "cv": "RepeatedKFold(5 folds x 3 repeats)",
                     "n_train": len(y_train),
                     "n_test": len(y_test),
                     "data_sha256": saved["data_sha256"],
@@ -129,6 +167,8 @@ def main():
                 mlflow.log_metrics(metrics)
                 mlflow.set_tags({**git_info(), "python": platform.python_version(),
                                  "sklearn": sklearn.__version__, "pandas": pd.__version__})
+                mlflow.log_artifact(str(preds_path), artifact_path="test")
+                mlflow.log_artifact(str(fig_path), artifact_path="test")
                 if is_chosen:
                     chosen_run_id = run.info.run_id
                     mlflow.log_artifact(str(MODEL_PATH))
