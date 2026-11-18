@@ -19,7 +19,7 @@ from sklearn.model_selection import GridSearchCV, KFold
 
 from src.data import load_train_test
 from src.evaluate import cv_metrics, oof_predictions
-from src.experiments import EXPERIMENTS
+from src.experiments import EXPERIMENTS, describe_model
 from src.split import load_config, load_split
 
 TRACKING_URI = "sqlite:///mlflow.db"
@@ -79,7 +79,8 @@ def run_one(name, spec, X, y, seed, use_mlflow):
         params = {
             "experiment": name,
             "description": spec["description"],
-            "model": type(base).__name__,
+            "model": describe_model(base)[0],
+            "target_transform": describe_model(base)[1],
             "features": ",".join(X_sel.columns),
             "seed": seed,
             "cv": "RepeatedKFold(5 folds x 3 repeats)",
