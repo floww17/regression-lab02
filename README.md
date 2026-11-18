@@ -22,7 +22,8 @@ data/             fish_participant.csv
 models/           model.joblib, model_meta.json, model-card.md
 reports/          lab02-report.md, figures/, tables/
 runs/             временные результаты запусков (не коммитятся)
-src/              split.py, data.py, evaluate.py, experiments.py, train.py, final.py, analyze.py
+src/              split.py, data.py, evaluate.py, experiments.py, train.py, final.py,
+                  analyze.py, passport.py, collinearity.py, export_mlflow.py
 tests/            автоматические проверки
 requirements-course.txt, requirements-lock.txt
 ```
@@ -34,10 +35,13 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements-course.txt
 python -m src.split        # создаёт configs/split_indices.json (однократно)
-python -m pytest -q        # ожидается: 20 passed
+python -m pytest -q        # ожидается: 23 passed
 python -m src.train        # кросс-валидация всех экспериментов, запись в MLflow
 python -m src.final        # единственная проверка на тесте, сохранение модели
 python -m src.analyze      # графики и таблицы анализа ошибок
+python -m src.passport     # паспорт данных
+python -m src.collinearity # корреляции, VIF, устойчивость коэффициентов
+python -m src.export_mlflow  # экспорт журнала MLflow в reports/tables
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 
@@ -56,13 +60,12 @@ print(model.predict(pd.DataFrame([{"Species": "Perch", "Length3": 30.0, "Height"
 | Параметр                               | Значение                                                                       |
 | -------------------------------------- | ------------------------------------------------------------------------------ |
 | Python                                 | `1.12.9`                                                                       |
-| scikit-learn / pandas / numpy / mlflow | ` `                                                                            |
+| scikit-learn / pandas / numpy / mlflow | `1.9.1 / 3.1.1 / 2.5.5 / 3.18.0`                                               |
 | ОС                                     | `Windows`                                                                      |
 | Seed                                   | 42 (разбиение, кросс-валидация, случайный лес)                                 |
 | Данные                                 | `data/fish_participant.csv`, SHA-256 в `configs/split_indices.json`            |
 | Разбиение                              | 80/20, стратификация по `Species`: 88 строк обучения, 23 теста                 |
 | Кросс-валидация                        | `RepeatedKFold` 5×3 на обучающей части; подбор параметров — вложенная проверка |
-| Итоговый коммит                        | `<git rev-parse --short HEAD>`                                                 |
 
 Метрики воспроизводятся при тех же версиях библиотек; при других версиях возможны небольшие расхождения.
 
@@ -78,4 +81,4 @@ print(model.predict(pd.DataFrame([{"Species": "Perch", "Length3": 30.0, "Height"
 
 ## Использование ИИ
 
-ИИ использовался как вспомогательный инструмент для диагностики окружения, поиска опечаток в коде и структурирования текста.
+Для генерации и отладки кода применялся Claude (Anthropic); подробности и проверка результата — в разделе 9 отчёта и в описании запроса на слияние.
