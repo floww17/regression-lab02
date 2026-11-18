@@ -1,0 +1,8 @@
+{
+  "data_path": "data/fish_participant.csv",
+  "target": "Weight",
+  "stratify_by": "Species",
+  "test_size": 0.2,
+  "seed": 42,
+  "output_path": "configs/split_indices.json"
+}

@@ -1,0 +1,22 @@
+{
+  "experiment": "E1c-author-baseline",
+  "description": "Базовое решение автора: Length3, Height, Width, лог признаков и цели",
+  "features": [
+    "Length3",
+    "Height",
+    "Width",
+    "Species"
+  ],
+  "target": "Weight (г)",
+  "sklearn": "1.9.1",
+  "python": "3.12.9",
+  "data_sha256": "3b9dfeca13eee107610c69243739e516f6aa0e7455ca29054b923f843a6f9d04",
+  "seed": 42,
+  "n_train": 88,
+  "n_test": 23,
+  "test_metrics": {
+    "mse": 1573.6777212965194,
+    "mae": 25.01022429779674,
+    "r2": 0.9848917020327566
+  }
+}

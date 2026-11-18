@@ -1,0 +1,13 @@
+experiment,n_pred_le_0,min_pred_g,n
+E0-mean,0,381.0,88
+E0-median,0,290.0,88
+E1a-linear-raw,12,-455.5,88
+E1b-linear-log1p-target,0,9.5,88
+E1c-author-baseline,0,7.0,88
+E2a-ridge-author-features,0,7.0,88
+E2b-ridge-all-lengths,0,7.3,88
+E3a-forest-raw-target,0,9.4,88
+E3b-forest-log-target,0,9.0,88
+E4a-ridge-raw-without-V,10,-433.3,88
+E4b-ridge-raw-with-V,4,-126.4,88
+E4c-ridge-log-with-V,0,7.0,88
