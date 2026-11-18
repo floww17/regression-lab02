@@ -1,31 +1,81 @@
-# Fish Weight Prediction Model:
+# FishGrow: прогноз массы рыбы (лабораторная работа №2)
 
-![Fish](images/Fishlength.jpg)
+Воспроизводимая регрессионная модель массы рыбы с честным разбиением данных, сравнением моделей и журналом экспериментов в MLflow. Работа выполнена на основе учебного проекта `fish_weight_prediction_machine_learning`; его исходные файлы (`train.py`, `preprocess.py`, `predict.py`, `reg.joblib`, `Pipfile`) оставлены в корне как справочный baseline и **не используются** в новом конвейере.
 
-## Requirements
+- Ветка работы: `lab/02-regression`
+- Отчёт: [`reports/lab02-report.md`](reports/lab02-report.md)
+- Паспорт модели: [`models/model-card.md`](models/model-card.md)
 
-Hello! Welcome to the famous Tsukiji fish market of Tokyo, Japan! We came here to collect data on some of the fish they have here 
-but we didn't wake up at 5am for the tuna auction and by the time we showed up they were only left with a few species of fish. 
-We got to work and gathered measurements from a few different species of fish and want you to train a regression model to predict
-the weight of a fish using some of the features we were able to measure. We have no idea which features will be good predictors. 
+## Задача
 
-We will hold out 30% of the data before we hand it to you and we will use that csv for scoring.
+По длине, высоте, ширине и виду предсказать массу рыбы в граммах. Метрики: MSE, MAE, R².
 
-Here's what we need from you:
-1. A function that accepts a csv path and returns the predictions of your regression model using our csv. The csv we use will contain all the columns. 
-2. Use a pipenv and scikit learn to submit the final model. You may use R for model selection. 
+## Результат
 
-With this function and it's output, we will rank the students by how well their model performed on predicting weight based on naive data. 
-Your grade will be determined by ranking according to Mean-squared Error.
-If your function does not return a list of predictions or we cannot compute the accuracy of your model that it will be an automatic F. 
+Лучшая модель — E1c (линейная регрессия по логарифмам признаков и цели). Тест, 23 строки: MSE 1 574, MAE 25.0 г, R² 0.985. Наивный прогноз средним: MAE 268.5 г. Полная таблица экспериментов E0–E4 — в отчёте.
 
-## Used
+## Структура репозитория
 
-*   Linear Regression
-*   Lasso Regression
-*   Random Forest
-*   Scikit Learn
-*   Python
-*   Joblib
-*   Matplotlib
-*   Pipenv
+```
+configs/          split.json (параметры разбиения), split_indices.json (индексы train/test)
+data/             fish_participant.csv
+models/           model.joblib, model_meta.json, model-card.md
+reports/          lab02-report.md, figures/, tables/
+runs/             временные результаты запусков (не коммитятся)
+src/              split.py, data.py, evaluate.py, experiments.py, train.py, final.py, analyze.py
+tests/            автоматические проверки
+requirements-course.txt, requirements-lock.txt
+```
+
+## Быстрый старт (Windows PowerShell)
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements-course.txt
+python -m src.split        # создаёт configs/split_indices.json (однократно)
+python -m pytest -q        # ожидается: 20 passed
+python -m src.train        # кросс-валидация всех экспериментов, запись в MLflow
+python -m src.final        # единственная проверка на тесте, сохранение модели
+python -m src.analyze      # графики и таблицы анализа ошибок
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+```
+
+Запуск части экспериментов: `python -m src.train E1c-author-baseline E2a-ridge-author-features`. Запуск без MLflow: `--no-mlflow`.
+
+Использование сохранённой модели:
+
+```python
+import joblib, pandas as pd
+model = joblib.load("models/model.joblib")
+print(model.predict(pd.DataFrame([{"Species": "Perch", "Length3": 30.0, "Height": 8.0, "Width": 4.5}])))
+```
+
+## Воспроизводимость
+
+| Параметр                               | Значение                                                                       |
+| -------------------------------------- | ------------------------------------------------------------------------------ |
+| Python                                 | `1.12.9`                                                                       |
+| scikit-learn / pandas / numpy / mlflow | ` `                                                                            |
+| ОС                                     | `Windows`                                                                      |
+| Seed                                   | 42 (разбиение, кросс-валидация, случайный лес)                                 |
+| Данные                                 | `data/fish_participant.csv`, SHA-256 в `configs/split_indices.json`            |
+| Разбиение                              | 80/20, стратификация по `Species`: 88 строк обучения, 23 теста                 |
+| Кросс-валидация                        | `RepeatedKFold` 5×3 на обучающей части; подбор параметров — вложенная проверка |
+| Итоговый коммит                        | `<git rev-parse --short HEAD>`                                                 |
+
+Метрики воспроизводятся при тех же версиях библиотек; при других версиях возможны небольшие расхождения.
+
+## Данные
+
+`data/fish_participant.csv`: 111 строк, 7 видов, пропусков нет. Поля: `Species`, `Weight` (г), `Length1`, `Length2`, `Length3`, `Height`, `Width` (см).
+
+Файл `fish_holdout_demo.csv` целиком входит в `fish_participant.csv`, поэтому как тестовая выборка не используется. Тест выделен из `fish_participant.csv` и открывается один раз (`src/final.py`).
+
+## Ограничения
+
+Малая выборка (23 тестовые строки), нет сведений о фермах и партиях, возможна ошибка в одной из строк, неизвестные виды и размеры вне обучающего диапазона не поддерживаются. Подробнее — в отчёте и паспорте модели.
+
+## Использование ИИ
+
+ИИ использовался как вспомогательный инструмент для диагностики окружения, поиска опечаток в коде и структурирования текста.
