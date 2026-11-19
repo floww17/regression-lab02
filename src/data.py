@@ -1,4 +1,4 @@
-"""Загрузка данных по сохранённому разбиению (configs/split_indices.json)."""
+# Загрузка данных по сохранённому разбиению (configs/split_indices.json).
 import pandas as pd
 
 from src.split import file_sha256, load_config, load_split

@@ -6,3 +6,4 @@ mlruns/
 mlflow.db
 mlruns/
 runs/
+.vscode/

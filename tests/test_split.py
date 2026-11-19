@@ -1,4 +1,4 @@
-"""Быстрые проверки разбиения. Запуск из корня: python -m pytest -q"""
+# Быстрые проверки разбиения. Запуск из корня: python -m pytest -q
 import pandas as pd
 
 from src.split import load_config, load_split, make_split

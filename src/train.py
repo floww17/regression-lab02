@@ -4,7 +4,7 @@
     python -m src.train E0-mean E1a-linear-raw
     python -m src.train --no-mlflow        # без записи в MLflow
 
-На этом этапе используется ТОЛЬКО обучающая часть (кросс-валидация).
+На этом этапе используется только обучающая часть (кросс-валидация).
 Тестовая выборка не открывается.
 """
 import argparse
@@ -115,7 +115,7 @@ def main():
         raise SystemExit(f"Нет такого эксперимента: {unknown}. Доступны: {list(EXPERIMENTS)}")
 
     seed = load_config()["seed"]
-    X_train, y_train, _, _ = load_train_test()  # тест здесь не используется
+    X_train, y_train, _, _ = load_train_test()
 
     use_mlflow = not args.no_mlflow
     if use_mlflow:

@@ -1,4 +1,4 @@
-"""Проверка приведения таблицы MLflow к читаемому виду (без запуска MLflow)."""
+# Проверка приведения таблицы MLflow к читаемому виду (без запуска MLflow).
 import pandas as pd
 
 from src.export_mlflow import tidy_runs

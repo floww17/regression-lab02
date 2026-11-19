@@ -16,7 +16,7 @@ TAB = Path("reports/tables")
 
 
 def tidy_runs(df):
-    """Приводит таблицу mlflow.search_runs к читаемому виду."""
+    # Приводит таблицу mlflow.search_runs к читаемому виду.
     out = pd.DataFrame(index=df.index)
     out["run_name"] = df.get("tags.mlflow.runName")
     for col in ("run_id", "status", "start_time", "end_time"):
@@ -34,7 +34,7 @@ def tidy_runs(df):
 
 
 def structure_snapshot(root="mlruns"):
-    """Дерево каталогов артефактов (имена файлов), если папка mlruns существует."""
+    # Дерево каталогов артефактов (имена файлов), если папка mlruns существует.
     root = Path(root)
     if not root.exists():
         return "(папка mlruns не найдена)\n"

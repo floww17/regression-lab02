@@ -1,4 +1,4 @@
-"""Метрики и кросс-валидация."""
+# Метрики и кросс-валидация.
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -24,7 +24,7 @@ def make_cv(seed, n_splits=5, n_repeats=3):
 
 
 def cv_metrics(model, X, y, seed):
-    """Среднее и стандартное отклонение метрик по всем фолдам."""
+    # Среднее и стандартное отклонение метрик по всем фолдам.
     res = cross_validate(model, X, y, cv=make_cv(seed), scoring=SCORING)
     out = {}
     for name in SCORING:
@@ -37,7 +37,7 @@ def cv_metrics(model, X, y, seed):
 
 
 def oof_predictions(model, X, y, seed, n_splits=5):
-    """Прогноз для каждой обучающей строки моделью, которая эту строку не видела."""
+    # Прогноз для каждой обучающей строки моделью, которая эту строку не видела.
     cv = KFold(n_splits=n_splits, shuffle=True, random_state=seed)
     pred = cross_val_predict(model, X, y, cv=cv)
     out = pd.DataFrame({"y_true": y.values, "y_pred": pred}, index=y.index)

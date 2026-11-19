@@ -26,12 +26,12 @@ def load_config(path=CONFIG_PATH):
 
 
 def file_sha256(path):
-    """Контрольная сумма файла: по ней видно, что данные не менялись."""
+    # Контрольная сумма файла: по ней видно, что данные не менялись.
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def make_split(df, stratify_by, test_size, seed):
-    """Возвращает (train_idx, test_idx): списки позиций строк (0..n-1)."""
+    # Возвращает (train_idx, test_idx): списки позиций строк (0..n-1).
     positions = list(range(len(df)))
     train_idx, test_idx = train_test_split(
         positions,
@@ -61,7 +61,7 @@ def save_split(cfg, train_idx, test_idx):
 
 
 def load_split(path="configs/split_indices.json"):
-    """Читает сохранённые индексы. Используйте это везде вместо нового split."""
+    # Читает сохранённые индексы.
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 

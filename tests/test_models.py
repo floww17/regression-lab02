@@ -1,4 +1,4 @@
-"""Быстрые проверки моделей. Обучение маленькое, без перекрёстной проверки."""
+# Быстрые проверки моделей. Обучение маленькое, без перекрёстной проверки.
 import numpy as np
 import pytest
 
@@ -39,4 +39,4 @@ def test_metrics_match_manual_calculation():
     m = regression_metrics(y_true, y_pred)
     assert m["mse"] == pytest.approx(1 / 3)
     assert m["mae"] == pytest.approx(1 / 3)
-    assert m["r2"] == pytest.approx(0.5)  # 1 - 1/2
+    assert m["r2"] == pytest.approx(0.5)

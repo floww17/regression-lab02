@@ -3,7 +3,7 @@
     python -m src.final            # с записью в MLflow
     python -m src.final --no-mlflow
 
-ПРАВИЛО: лучшая модель выбрана ДО просмотра теста - по средней ошибке
+ПРАВИЛО: лучшая модель выбрана до просмотра теста - по средней ошибке
 кросс-валидации (cv_mse_mean) и простоте. Ниже она зафиксирована в константе.
 Тестовые метрики остальных экспериментов считаются только для итоговой таблицы
 отчёта; выбор модели по ним менять нельзя.
@@ -18,9 +18,9 @@ import joblib
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import pandas as pd  # noqa: E402
-import sklearn  # noqa: E402
+import matplotlib.pyplot as plt
+import pandas as pd
+import sklearn
 from sklearn.model_selection import GridSearchCV, KFold
 
 from src.data import load_train_test
@@ -29,12 +29,12 @@ from src.experiments import EXPERIMENTS, describe_model
 from src.split import load_config, load_split
 from src.train import MLFLOW_EXPERIMENT, TRACKING_URI, git_info
 
-CHOSEN = "E1c-author-baseline"  # решение принято до просмотра теста (см. отчёт)
+CHOSEN = "E1c-author-baseline"  # решение принято до просмотра теста
 MODEL_PATH = Path("models/model.joblib")
 
 
 def fit_final(spec, X, y, seed):
-    """Обучение на всей обучающей части. Если есть сетка - подбор по кросс-валидации."""
+    # Обучение на всей обучающей части. Если есть сетка - подбор по кросс-валидации.
     base = spec["build"]()
     grid = spec.get("param_grid")
     if not grid:
@@ -47,7 +47,7 @@ def fit_final(spec, X, y, seed):
 
 
 def save_test_figure(name, y_true, pred, path):
-    """Остатки против прогноза и прогноз против истины на тестовой выборке."""
+    # Остатки против прогноза и прогноз против истины на тестовой выборке.
     fig, ax = plt.subplots(1, 2, figsize=(10, 4))
     ax[0].scatter(pred, y_true - pred, s=24)
     ax[0].axhline(0, color="k", lw=1)
@@ -178,7 +178,7 @@ def main():
                         import mlflow.sklearn
 
                         mlflow.sklearn.log_model(model, artifact_path="model")
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         print("   (mlflow.sklearn.log_model не сработал:", exc, ")")
 
     if chosen_run_id:

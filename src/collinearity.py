@@ -19,7 +19,7 @@ N_BOOT = 200
 
 
 def vif(df):
-    """VIF_j = 1 / (1 - R^2_j): R^2 регрессии столбца j на остальные столбцы."""
+    # VIF_j = 1 / (1 - R^2_j): R^2 регрессии столбца j на остальные столбцы.
     out = {}
     for col in df.columns:
         y = df[col].to_numpy(float)
@@ -32,7 +32,7 @@ def vif(df):
 
 
 def bootstrap_coefs(X, y, numeric, log_features, log_target, regressor, seed):
-    """Коэффициенты при числовых признаках (стандартизованных) по бутстреп-выборкам."""
+    # Коэффициенты при числовых признаках (стандартизованных) по бутстреп-выборкам.
     rng = np.random.default_rng(seed)
     cols = numeric + ["Species"]
     coefs = []

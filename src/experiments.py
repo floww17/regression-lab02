@@ -1,5 +1,5 @@
-"""Описание экспериментов. Каждая модель - единая цепочка (Pipeline):
-заполнение пропусков -> (логарифм) -> масштаб/кодирование -> модель."""
+# Описание экспериментов. Каждая модель - единая цепочка (Pipeline):
+# заполнение пропусков -> (логарифм) -> масштаб/кодирование -> модель.
 import numpy as np
 from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.dummy import DummyRegressor
@@ -52,7 +52,7 @@ def make_model(regressor, numeric, categorical, log_features=False, target="raw"
 
 
 def describe_model(model):
-    """Класс итогового регрессора и преобразование цели (для журнала MLflow)."""
+    # Класс итогового регрессора и преобразование цели (для журнала MLflow).
     target = "none"
     m = model
     if isinstance(m, TransformedTargetRegressor):
@@ -63,7 +63,7 @@ def describe_model(model):
     return type(m).__name__, target
 
 
-AUTHOR_NUMERIC = ["Length3", "Height", "Width"]  # так делал автор проекта
+AUTHOR_NUMERIC = ["Length3", "Height", "Width"]
 
 # Сетки гиперпараметров (заданы заранее, чтобы не подгонять под результат)
 ALPHAS = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
@@ -101,7 +101,7 @@ EXPERIMENTS = {
             LinearRegression(), AUTHOR_NUMERIC, CATEGORICAL, log_features=True, target="log"
         ),
     ),
-    # ---- E2: гребневая регрессия, alpha выбирается кросс-валидацией ----
+    # E2: гребневая регрессия, alpha выбирается кросс-валидацией
     "E2a-ridge-author-features": dict(
         description="Ridge, признаки автора (Length3, Height, Width), лог признаков и цели",
         numeric=AUTHOR_NUMERIC,
@@ -118,7 +118,7 @@ EXPERIMENTS = {
         ),
         param_grid={"regressor__regressor__alpha": ALPHAS},
     ),
-    # ---- E3: случайный лес, небольшая заранее заданная сетка ----
+    # E3: случайный лес, небольшая заранее заданная сетка
     "E3a-forest-raw-target": dict(
         description="Случайный лес, масса без преобразования",
         numeric=NUMERIC_ALL,
@@ -137,7 +137,7 @@ EXPERIMENTS = {
         ),
         param_grid=FOREST_GRID_LOG,
     ),
-    # ---- E4: влияет ли признак объёма V = Length3 * Height * Width ----
+    # E4: влияет ли признак объёма V = Length3 * Height * Width
     # Одна и та же модель (Ridge, alpha по кросс-валидации), те же данные и разбиение;
     # отличается только наличие V_proxy.
     "E4a-ridge-raw-without-V": dict(
